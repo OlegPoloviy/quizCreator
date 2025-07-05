@@ -4,22 +4,88 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import QuizCreationForm from "@/components/forms/QuizCreationForm";
 import { toast } from "sonner";
+import { quizService } from "../lib/quiz.service";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function CreateQuizPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
   const handleSubmit = async (data: any) => {
     try {
-      console.log("Quiz data:", data);
+      setIsLoading(true);
 
+      console.log("Form data received:", data); // Debug log
+
+      if (!data || !data.questions || !Array.isArray(data.questions)) {
+        throw new Error(
+          "Invalid form data: questions array is missing or invalid"
+        );
+      }
+
+      const transformedData = {
+        title: data.title,
+        description: data.description,
+        questions: data.questions.map((question: any, index: number) => {
+          const transformedQuestion: any = {
+            text: question.text,
+            type: question.type,
+            order: index + 1, // Use array index + 1 as order
+            required: question.required ?? true,
+          };
+
+          // Handle options based on question type
+          if (question.type === "INPUT") {
+            // Input questions don't need options
+            return transformedQuestion;
+          } else if (question.type === "BOOLEAN") {
+            // Boolean questions have fixed options
+            transformedQuestion.options = [
+              {
+                text: "Yes",
+                isCorrect:
+                  question.options?.find((opt: any) => opt.text === "Yes")
+                    ?.isCorrect || false,
+                order: 1,
+              },
+              {
+                text: "No",
+                isCorrect:
+                  question.options?.find((opt: any) => opt.text === "No")
+                    ?.isCorrect || false,
+                order: 2,
+              },
+            ];
+          } else if (question.type === "CHECKBOX") {
+            // Checkbox questions have multiple options
+            transformedQuestion.options =
+              question.options?.map((opt: any, optIndex: number) => ({
+                text: opt.text,
+                isCorrect: opt.isCorrect,
+                order: optIndex + 1,
+              })) || [];
+          }
+
+          return transformedQuestion;
+        }),
+      };
+
+      console.log("Transformed data:", transformedData); // Debug log
+
+      const quiz = await quizService.createQuiz(transformedData);
       toast.success("Quiz created successfully!");
+      router.push("/quizzes");
     } catch (error) {
       console.error("Error creating quiz:", error);
       toast.error("Error creating quiz. Please try again.");
+      setIsLoading(false);
       throw error;
     }
   };
 
   const handleCancel = () => {
-    window.history.back();
+    router.back();
   };
 
   return (

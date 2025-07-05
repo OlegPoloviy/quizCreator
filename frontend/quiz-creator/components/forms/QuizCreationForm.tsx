@@ -41,14 +41,10 @@ const questionSchema = z.object({
     .string()
     .min(1, "Question text cannot be empty")
     .max(1000, "Question text cannot exceed 1000 characters"),
-  type: z.enum(["SINGLE_CHOICE", "MULTIPLE_CHOICE", "TEXT"]),
+  type: z.enum(["BOOLEAN", "INPUT", "CHECKBOX"]),
   order: z.number().min(1, "Order must be at least 1"),
   required: z.boolean(),
-  options: z
-    .array(questionOptionSchema)
-    .min(1, "At least one option is required for choice questions")
-    .max(10, "Maximum 10 options allowed")
-    .optional(),
+  options: z.array(questionOptionSchema).optional(),
 });
 
 const quizSchema = z.object({
@@ -87,16 +83,17 @@ export default function QuizCreationForm({
       questions: [
         {
           text: "",
-          type: "SINGLE_CHOICE",
+          type: "BOOLEAN",
           order: 1,
           required: true,
           options: [
-            { text: "", isCorrect: false, order: 1 },
-            { text: "", isCorrect: false, order: 2 },
+            { text: "Yes", isCorrect: true, order: 1 },
+            { text: "No", isCorrect: false, order: 2 },
           ],
         },
       ],
     },
+    mode: "onChange",
   });
 
   const {
@@ -109,6 +106,7 @@ export default function QuizCreationForm({
   });
 
   const handleSubmit = async (data: QuizFormData) => {
+    console.log("Form submission data:", data); // Debug log
     setIsSubmitting(true);
     try {
       await onSubmit(data);
@@ -123,12 +121,12 @@ export default function QuizCreationForm({
     const newOrder = questionFields.length + 1;
     appendQuestion({
       text: "",
-      type: "SINGLE_CHOICE",
+      type: "BOOLEAN",
       order: newOrder,
       required: true,
       options: [
-        { text: "", isCorrect: false, order: 1 },
-        { text: "", isCorrect: false, order: 2 },
+        { text: "Yes", isCorrect: true, order: 1 },
+        { text: "No", isCorrect: false, order: 2 },
       ],
     });
   };
@@ -163,16 +161,21 @@ export default function QuizCreationForm({
   const handleQuestionTypeChange = (questionIndex: number, type: string) => {
     form.setValue(`questions.${questionIndex}.type`, type as any);
 
-    // Reset options for text questions
-    if (type === "TEXT") {
+    // Reset options based on question type
+    if (type === "INPUT") {
       form.setValue(`questions.${questionIndex}.options`, []);
-    } else if (type === "SINGLE_CHOICE" || type === "MULTIPLE_CHOICE") {
+    } else if (type === "BOOLEAN") {
+      form.setValue(`questions.${questionIndex}.options`, [
+        { text: "Yes", isCorrect: true, order: 1 },
+        { text: "No", isCorrect: false, order: 2 },
+      ]);
+    } else if (type === "CHECKBOX") {
       const currentOptions =
         form.getValues(`questions.${questionIndex}.options`) || [];
       if (currentOptions.length === 0) {
         form.setValue(`questions.${questionIndex}.options`, [
-          { text: "", isCorrect: false, order: 1 },
-          { text: "", isCorrect: false, order: 2 },
+          { text: "Option 1", isCorrect: true, order: 1 },
+          { text: "Option 2", isCorrect: false, order: 2 },
         ]);
       }
     }
@@ -180,7 +183,12 @@ export default function QuizCreationForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+      <form
+        onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+          console.error("Form validation errors:", errors);
+        })}
+        className="space-y-8"
+      >
         {/* Quiz Details */}
         <Card>
           <CardHeader>
@@ -298,13 +306,13 @@ export default function QuizCreationForm({
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="SINGLE_CHOICE">
-                              Single Choice
+                            <SelectItem value="BOOLEAN">
+                              Boolean (Yes/No)
                             </SelectItem>
-                            <SelectItem value="MULTIPLE_CHOICE">
+                            <SelectItem value="INPUT">Text Input</SelectItem>
+                            <SelectItem value="CHECKBOX">
                               Multiple Choice
                             </SelectItem>
-                            <SelectItem value="TEXT">Text Answer</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -341,7 +349,7 @@ export default function QuizCreationForm({
                 </div>
 
                 {/* Options for choice questions */}
-                {form.watch(`questions.${questionIndex}.type`) !== "TEXT" && (
+                {form.watch(`questions.${questionIndex}.type`) !== "INPUT" && (
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <FormLabel>Answer Options</FormLabel>
@@ -393,12 +401,39 @@ export default function QuizCreationForm({
                                     type={
                                       form.watch(
                                         `questions.${questionIndex}.type`
-                                      ) === "MULTIPLE_CHOICE"
+                                      ) === "CHECKBOX"
                                         ? "checkbox"
                                         : "radio"
                                     }
                                     checked={field.value}
-                                    onChange={field.onChange}
+                                    onChange={(e) => {
+                                      const isCheckbox =
+                                        form.watch(
+                                          `questions.${questionIndex}.type`
+                                        ) === "CHECKBOX";
+
+                                      if (isCheckbox) {
+                                        // For checkboxes, just use the boolean value
+                                        field.onChange(e.target.checked);
+                                      } else {
+                                        // For radio buttons, set this option to true and others to false
+                                        const currentOptions =
+                                          form.getValues(
+                                            `questions.${questionIndex}.options`
+                                          ) || [];
+                                        const updatedOptions =
+                                          currentOptions.map(
+                                            (opt: any, idx: number) => ({
+                                              ...opt,
+                                              isCorrect: idx === optionIndex,
+                                            })
+                                          );
+                                        form.setValue(
+                                          `questions.${questionIndex}.options`,
+                                          updatedOptions
+                                        );
+                                      }
+                                    }}
                                     name={`question-${questionIndex}`}
                                     className="w-4 h-4 text-indigo-600"
                                   />

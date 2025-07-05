@@ -20,8 +20,9 @@ import {
 import { quizService } from "./lib/quiz.service";
 
 export default async function Home() {
-  const quizzes = await quizService.getQuizzes();
-  console.log(quizzes);
+  const quiz = await quizService.getQuizzes();
+  console.log(quiz);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Navigation */}
@@ -64,11 +65,23 @@ export default async function Home() {
               assessments and track completion with our simple, powerful
               platform.
             </p>
-            <div className="flex justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button size="lg" className="text-lg px-8 py-6" asChild>
                 <Link href="/createQuiz">
                   <Plus className="w-5 h-5 mr-2" />
                   Create Your First Quiz
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-lg px-8 py-6"
+                asChild
+              >
+                <Link href="/quizzes">
+                  <Brain className="w-5 h-5 mr-2" />
+                  View Quizzes
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Link>
               </Button>
