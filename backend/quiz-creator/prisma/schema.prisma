@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+
+model Quiz {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relationships
+  questions   Question[]
+  attempts    QuizAttempt[]
+  
+  @@map("quizzes")
+}
+
+model Question {
+  id       String      @id @default(cuid())
+  text     String
+  type     QuestionType
+  order    Int         
+  required Boolean     @default(true)
+  
+  // Foreign Keys
+  quizId   String
+  quiz     Quiz        @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  // Relationships
+  options  QuestionOption[]
+  answers  QuestionAnswer[]
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("questions")
+}
+
+model QuestionOption {
+  id         String  @id @default(cuid())
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int     
+  
+  // Foreign Keys
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("question_options")
+}
+
+enum QuestionType {
+  BOOLEAN    
+  INPUT      
+  CHECKBOX   
+  RADIO      
+}
+
+
+model QuizAttempt {
+  id        String   @id @default(cuid())
+  
+  // Foreign Keys
+  quizId    String
+  quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  
+  // Attempt details
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+  score     Float?
+  
+  // Relationships
+  answers   QuestionAnswer[]
+  
+  @@map("quiz_attempts")
+}
+
+model QuestionAnswer {
+  id       String @id @default(cuid())
+  
+  // Foreign Keys
+  attemptId String
+  attempt   QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  
+  // Answer content
+  textAnswer    String?   // For INPUT type questions
+  booleanAnswer Boolean?  // For BOOLEAN type questions
+  selectedOptions String[] // For CHECKBOX type - array of option IDs
+  
+  createdAt DateTime @default(now())
+  
+  @@map("question_answers")
+}
