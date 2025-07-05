@@ -16,8 +16,6 @@ export default function CreateQuizPage() {
     try {
       setIsLoading(true);
 
-      console.log("Form data received:", data); // Debug log
-
       if (!data || !data.questions || !Array.isArray(data.questions)) {
         throw new Error(
           "Invalid form data: questions array is missing or invalid"
@@ -27,35 +25,14 @@ export default function CreateQuizPage() {
       const transformedData = {
         title: data.title,
         description: data.description,
-        questions: data.questions.map((question: any, index: number) => {
-          const transformedQuestion: any = {
-            text: question.text,
-            type: question.type,
-            order: index + 1, // Use array index + 1 as order
-            required: question.required ?? true,
-          };
-
-          // Handle options based on question type
-          if (question.type === "INPUT") {
-            // Input questions don't need options
-            return transformedQuestion;
-          } else if (question.type === "BOOLEAN") {
-            transformedQuestion.options = question.options;
-          } else if (question.type === "CHECKBOX") {
-            // Checkbox questions have multiple options
-            transformedQuestion.options =
-              question.options?.map((opt: any, optIndex: number) => ({
-                text: opt.text,
-                isCorrect: opt.isCorrect,
-                order: optIndex + 1,
-              })) || [];
-          }
-
-          return transformedQuestion;
-        }),
+        questions: data.questions.map((question: any, index: number) => ({
+          text: question.text,
+          type: question.type,
+          order: index + 1,
+          required: question.required ?? true,
+          options: question.options,
+        })),
       };
-
-      console.log("Transformed data:", transformedData); // Debug log
 
       const quiz = await quizService.createQuiz(transformedData);
       toast.success("Quiz created successfully!");

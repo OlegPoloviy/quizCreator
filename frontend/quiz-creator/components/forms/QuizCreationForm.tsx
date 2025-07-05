@@ -106,7 +106,6 @@ export default function QuizCreationForm({
   });
 
   const handleSubmit = async (data: QuizFormData) => {
-    console.log("Form submission data:", data); // Debug log
     setIsSubmitting(true);
     try {
       await onSubmit(data);
@@ -163,7 +162,9 @@ export default function QuizCreationForm({
 
     // Reset options based on question type
     if (type === "INPUT") {
-      form.setValue(`questions.${questionIndex}.options`, []);
+      form.setValue(`questions.${questionIndex}.options`, [
+        { text: "", isCorrect: true, order: 1 },
+      ]);
     } else if (type === "BOOLEAN") {
       form.setValue(`questions.${questionIndex}.options`, [
         { text: "true", isCorrect: true, order: 1 },
@@ -413,10 +414,8 @@ export default function QuizCreationForm({
                                         ) === "CHECKBOX";
 
                                       if (isCheckbox) {
-                                        // For checkboxes, just use the boolean value
                                         field.onChange(e.target.checked);
                                       } else {
-                                        // For radio buttons, set this option to true and others to false
                                         const currentOptions =
                                           form.getValues(
                                             `questions.${questionIndex}.options`
@@ -457,6 +456,38 @@ export default function QuizCreationForm({
                           )}
                         </div>
                       ))}
+                  </div>
+                )}
+                {/* Correct answer for INPUT questions */}
+                {form.watch(`questions.${questionIndex}.type`) === "INPUT" && (
+                  <div className="space-y-4">
+                    <FormLabel>Correct Answer</FormLabel>
+                    <FormField
+                      control={form.control}
+                      name={`questions.${questionIndex}.options.0.text`}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter the correct answer..."
+                              value={field.value}
+                              onChange={(e) => {
+                                field.onChange(e.target.value);
+                                form.setValue(
+                                  `questions.${questionIndex}.options.0.isCorrect`,
+                                  true
+                                );
+                                form.setValue(
+                                  `questions.${questionIndex}.options.0.order`,
+                                  1
+                                );
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 )}
               </CardContent>

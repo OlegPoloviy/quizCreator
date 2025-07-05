@@ -9,6 +9,8 @@ import QuizFilters from "@/components/quizzes/QuizFilters";
 import EmptyState from "@/components/quizzes/EmptyState";
 import { quizService } from "../lib/quiz.service";
 import { Quiz } from "@/types/Quiz.types";
+import { toast } from "sonner";
+import QuizEditDialog from "@/components/quizzes/QuizEditDialog";
 
 export default function QuizzesPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -18,6 +20,9 @@ export default function QuizzesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("newest");
   const [filterBy, setFilterBy] = useState("all");
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleQuizDeleted = (quizId: string) => {
     setQuizzes((prevQuizzes) =>
@@ -26,6 +31,29 @@ export default function QuizzesPage() {
     setFilteredQuizzes((prevQuizzes) =>
       prevQuizzes.filter((quiz) => quiz.id !== quizId)
     );
+  };
+
+  const handleQuizUpdate = async (
+    quiz: Quiz,
+    data: { title: string; description?: string }
+  ) => {
+    setIsSaving(true);
+    try {
+      const updatedQuiz = await quizService.updateQuiz(quiz.id, data);
+      toast.success("Quiz updated!");
+      setQuizzes((prev) =>
+        prev.map((q) => (q.id === quiz.id ? { ...q, ...updatedQuiz } : q))
+      );
+      setFilteredQuizzes((prev) =>
+        prev.map((q) => (q.id === quiz.id ? { ...q, ...updatedQuiz } : q))
+      );
+      setEditDialogOpen(false);
+      setEditingQuiz(null);
+    } catch (err) {
+      toast.error("Failed to update quiz");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   useEffect(() => {
@@ -187,15 +215,36 @@ export default function QuizzesPage() {
 
         {/* Quizzes Grid */}
         {filteredQuizzes.length > 0 ? (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredQuizzes.map((quiz) => (
-              <QuizCard
-                key={quiz.id}
-                quiz={quiz}
-                onQuizDeleted={handleQuizDeleted}
-              />
-            ))}
-          </div>
+          <>
+            <QuizEditDialog
+              open={editDialogOpen}
+              onOpenChange={(open) => {
+                setEditDialogOpen(open);
+                if (!open) setEditingQuiz(null);
+              }}
+              quiz={editingQuiz}
+              isSaving={isSaving}
+              onSave={(data) => {
+                if (editingQuiz) handleQuizUpdate(editingQuiz, data);
+              }}
+            />
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredQuizzes.map((quiz) => (
+                <div key={quiz.id} className="relative">
+                  <QuizCard quiz={quiz} onQuizDeleted={handleQuizDeleted} />
+                  <button
+                    className="absolute top-2 right-2 bg-yellow-100 hover:bg-yellow-200 text-yellow-800 rounded px-2 py-1 text-xs"
+                    onClick={() => {
+                      setEditingQuiz(quiz);
+                      setEditDialogOpen(true);
+                    }}
+                  >
+                    Edit
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         ) : (
           <EmptyState searchQuery={searchQuery} />
         )}

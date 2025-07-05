@@ -87,6 +87,19 @@ class QuizService {
       throw error;
     }
   }
+
+  async updateQuiz(id: string, updateQuizDto: any) {
+    try {
+      const response = await axios.patch(
+        `${this.baseUrl}/quiz/${id}`,
+        updateQuizDto
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating quiz:", error);
+      throw error;
+    }
+  }
 }
 
 export const quizService = new QuizService();

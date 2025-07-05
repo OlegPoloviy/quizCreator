@@ -36,11 +36,6 @@ export default function QuestionCard({
     );
   }
 
-  // Add debug logging for current question and answer
-  console.log("[QuestionCard] Question:", question);
-  console.log("[QuestionCard] User answer:", userAnswer);
-  console.log("[QuestionCard] Type:", question.type);
-
   const handleAnswerChange = (answer: any) => {
     onAnswerChange(question.id, answer);
   };

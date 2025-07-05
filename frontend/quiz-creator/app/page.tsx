@@ -20,9 +20,6 @@ import {
 import { quizService } from "./lib/quiz.service";
 
 export default async function Home() {
-  const quiz = await quizService.getQuizzes();
-  console.log(quiz);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Navigation */}
