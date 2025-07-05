@@ -40,23 +40,7 @@ export default function CreateQuizPage() {
             // Input questions don't need options
             return transformedQuestion;
           } else if (question.type === "BOOLEAN") {
-            // Boolean questions have fixed options
-            transformedQuestion.options = [
-              {
-                text: "Yes",
-                isCorrect:
-                  question.options?.find((opt: any) => opt.text === "Yes")
-                    ?.isCorrect || false,
-                order: 1,
-              },
-              {
-                text: "No",
-                isCorrect:
-                  question.options?.find((opt: any) => opt.text === "No")
-                    ?.isCorrect || false,
-                order: 2,
-              },
-            ];
+            transformedQuestion.options = question.options;
           } else if (question.type === "CHECKBOX") {
             // Checkbox questions have multiple options
             transformedQuestion.options =

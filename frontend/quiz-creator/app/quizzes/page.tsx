@@ -9,7 +9,6 @@ import QuizFilters from "@/components/quizzes/QuizFilters";
 import EmptyState from "@/components/quizzes/EmptyState";
 import { quizService } from "../lib/quiz.service";
 import { Quiz } from "@/types/Quiz.types";
-import { toast } from "sonner";
 
 export default function QuizzesPage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
@@ -51,7 +50,6 @@ export default function QuizzesPage() {
   useEffect(() => {
     let filtered = [...quizzes];
 
-    // Apply search filter
     if (searchQuery) {
       filtered = filtered.filter(
         (quiz) =>
@@ -61,7 +59,6 @@ export default function QuizzesPage() {
       );
     }
 
-    // Apply category filter
     switch (filterBy) {
       case "recent":
         const oneWeekAgo = new Date();

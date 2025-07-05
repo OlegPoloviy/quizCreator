@@ -1,5 +1,10 @@
 import axios from "axios";
-import { CreateQuizDto, Quiz } from "@/types/Quiz.types";
+import {
+  CreateQuizDto,
+  Quiz,
+  SubmitAnswerDto,
+  SubmitQuizDto,
+} from "@/types/Quiz.types";
 
 class QuizService {
   private baseUrl: string;
@@ -56,6 +61,29 @@ class QuizService {
       const response = await axios.delete<Quiz>(`${this.baseUrl}/quiz/${id}`);
     } catch (error) {
       console.error("Error getting quiz:", error);
+      throw error;
+    }
+  }
+
+  async submitAnswer(answer: SubmitAnswerDto) {
+    try {
+      const response = await axios.post<Quiz>(`${this.baseUrl}/quiz/submit`);
+      return response;
+    } catch (error) {
+      console.error("Error getting quiz:", error);
+      throw error;
+    }
+  }
+
+  async submitQuizAnswers(submitQuizDto: SubmitQuizDto) {
+    try {
+      const response = await axios.post(
+        `${this.baseUrl}/quiz/submit`,
+        submitQuizDto
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error submitting quiz answers:", error);
       throw error;
     }
   }

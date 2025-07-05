@@ -23,6 +23,24 @@ export default function QuestionCard({
 }: QuestionCardProps) {
   const [textInput, setTextInput] = useState(userAnswer || "");
 
+  // Add defensive checks for question data
+  if (!question || !question.text || !question.type) {
+    return (
+      <Card className="border-0 shadow-lg">
+        <CardContent className="p-6">
+          <div className="text-center text-red-600">
+            <p>Invalid question data</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Add debug logging for current question and answer
+  console.log("[QuestionCard] Question:", question);
+  console.log("[QuestionCard] User answer:", userAnswer);
+  console.log("[QuestionCard] Type:", question.type);
+
   const handleAnswerChange = (answer: any) => {
     onAnswerChange(question.id, answer);
   };
@@ -112,40 +130,52 @@ export default function QuestionCard({
             </div>
           )}
 
-          {question.type === "CHECKBOX" && question.options && (
+          {question.type === "CHECKBOX" && Array.isArray(question.options) && (
             <div className="space-y-2">
-              {question.options.map((option, index) => (
-                <label
-                  key={index}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                    Array.isArray(userAnswer) && userAnswer.includes(option)
-                      ? "border-indigo-500 bg-indigo-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <input
-                    type="checkbox"
-                    value={option}
-                    checked={
-                      Array.isArray(userAnswer) && userAnswer.includes(option)
-                    }
-                    onChange={(e) => {
-                      const currentAnswers = Array.isArray(userAnswer)
-                        ? userAnswer
-                        : [];
-                      if (e.target.checked) {
-                        handleAnswerChange([...currentAnswers, option]);
-                      } else {
-                        handleAnswerChange(
-                          currentAnswers.filter((a) => a !== option)
-                        );
+              {question.options.map((option, index) => {
+                if (
+                  !option ||
+                  typeof option !== "object" ||
+                  !option.text ||
+                  !option.id
+                ) {
+                  return null;
+                }
+                return (
+                  <label
+                    key={option.id}
+                    className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                      Array.isArray(userAnswer) &&
+                      userAnswer.includes(option.id)
+                        ? "border-indigo-500 bg-indigo-50"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      value={option.id}
+                      checked={
+                        Array.isArray(userAnswer) &&
+                        userAnswer.includes(option.id)
                       }
-                    }}
-                    className="w-4 h-4 text-indigo-600"
-                  />
-                  <span className="text-gray-900">{option}</span>
-                </label>
-              ))}
+                      onChange={(e) => {
+                        const currentAnswers = Array.isArray(userAnswer)
+                          ? userAnswer
+                          : [];
+                        if (e.target.checked) {
+                          handleAnswerChange([...currentAnswers, option.id]);
+                        } else {
+                          handleAnswerChange(
+                            currentAnswers.filter((a) => a !== option.id)
+                          );
+                        }
+                      }}
+                      className="w-4 h-4 text-indigo-600"
+                    />
+                    <span className="text-gray-900">{option.text}</span>
+                  </label>
+                );
+              })}
             </div>
           )}
 

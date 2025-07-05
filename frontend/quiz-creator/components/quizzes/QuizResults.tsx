@@ -19,12 +19,14 @@ interface QuizResultsProps {
   };
   userAnswers: Record<string, any>;
   onRetakeQuiz: () => void;
+  result?: any;
 }
 
 export default function QuizResults({
   quiz,
   userAnswers,
   onRetakeQuiz,
+  result,
 }: QuizResultsProps) {
   const answeredQuestions = Object.keys(userAnswers).length;
   const totalQuestions = quiz.questions.length;
@@ -32,12 +34,22 @@ export default function QuizResults({
     (answeredQuestions / totalQuestions) * 100
   );
 
+  const score = result?.score ?? completionPercentage;
+  const startedAt = result?.startedAt;
+  const completedAt = result?.completedAt;
+  const backendAnswers = result?.answers;
+
+  const completionRate = result?.score ?? completionPercentage;
+  const answeredCount = backendAnswers
+    ? backendAnswers.length
+    : answeredQuestions;
+
   const getCompletionMessage = () => {
-    if (completionPercentage === 100) {
+    if (score === 100) {
       return "Perfect! You completed all questions.";
-    } else if (completionPercentage >= 80) {
+    } else if (score >= 80) {
       return "Great job! You answered most questions.";
-    } else if (completionPercentage >= 60) {
+    } else if (score >= 60) {
       return "Good effort! You answered many questions.";
     } else {
       return "You answered some questions. Consider reviewing the quiz.";
@@ -45,9 +57,9 @@ export default function QuizResults({
   };
 
   const getCompletionColor = () => {
-    if (completionPercentage === 100) return "text-green-600";
-    if (completionPercentage >= 80) return "text-blue-600";
-    if (completionPercentage >= 60) return "text-yellow-600";
+    if (score === 100) return "text-green-600";
+    if (score >= 80) return "text-blue-600";
+    if (score >= 60) return "text-yellow-600";
     return "text-red-600";
   };
 
@@ -66,13 +78,26 @@ export default function QuizResults({
             <h2 className="text-2xl font-bold text-gray-900 mb-2">
               Quiz Completed!
             </h2>
+            <div className="flex items-center gap-4">
+              <span className={`text-2xl font-bold ${getCompletionColor()}`}>
+                {score}%
+              </span>
+              <span className="text-gray-500">Score</span>
+            </div>
+            {startedAt && completedAt && (
+              <div className="text-sm text-gray-500">
+                <span>Started: {new Date(startedAt).toLocaleString()}</span>
+                <span className="mx-2">|</span>
+                <span>Completed: {new Date(completedAt).toLocaleString()}</span>
+              </div>
+            )}
             <p className="text-gray-600 mb-4">{getCompletionMessage()}</p>
             <div className="flex items-center justify-center gap-4">
               <Badge variant="secondary" className="text-sm">
-                {answeredQuestions} of {totalQuestions} answered
+                {answeredCount} of {totalQuestions} answered
               </Badge>
               <Badge className={`text-sm ${getCompletionColor()}`}>
-                {completionPercentage}% Complete
+                {completionRate}% Complete
               </Badge>
             </div>
           </div>
@@ -87,7 +112,7 @@ export default function QuizResults({
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {answeredQuestions}
+              {backendAnswers ? backendAnswers.length : answeredQuestions}
             </div>
             <div className="text-sm text-gray-600">Questions Answered</div>
           </CardContent>
@@ -99,7 +124,8 @@ export default function QuizResults({
               <XCircle className="w-8 h-8 text-red-600" />
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {totalQuestions - answeredQuestions}
+              {totalQuestions -
+                (backendAnswers ? backendAnswers.length : answeredQuestions)}
             </div>
             <div className="text-sm text-gray-600">Questions Skipped</div>
           </CardContent>
@@ -146,13 +172,13 @@ export default function QuizResults({
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Completion Rate:</span>
               <span className={`font-medium ${getCompletionColor()}`}>
-                {completionPercentage}%
+                {completionRate}%
               </span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-gray-600">Questions Answered:</span>
               <span className="font-medium">
-                {answeredQuestions}/{totalQuestions}
+                {answeredCount}/{totalQuestions}
               </span>
             </div>
           </div>

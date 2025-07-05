@@ -24,6 +24,7 @@ export default function IndividualQuizPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<string, any>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [quizResult, setQuizResult] = useState<any>(null);
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -71,11 +72,38 @@ export default function IndividualQuizPage() {
   const handleFinish = async () => {
     setIsSubmitting(true);
     try {
-      // Here you would submit the quiz answers to your API
-      console.log("Quiz answers:", userAnswers);
-      // await quizService.submitQuizAnswers(quizId, userAnswers);
+      if (!quiz) throw new Error("Quiz not loaded");
+      const answers = quiz.questions.map((question) => {
+        const userAnswer = userAnswers[question.id];
+        if (question.type === "BOOLEAN") {
+          return {
+            questionId: question.id,
+            booleanAnswer: userAnswer === "true" ? true : false,
+          };
+        }
+        if (question.type === "CHECKBOX") {
+          const selectedOptions = Array.isArray(userAnswer) ? userAnswer : [];
+          return {
+            questionId: question.id,
+            selectedOptions,
+          };
+        }
+        if (question.type === "INPUT") {
+          return {
+            questionId: question.id,
+            textAnswer: userAnswer,
+          };
+        }
+        return { questionId: question.id };
+      });
 
-      // Show results instead of navigating away
+      const submitQuizDto = {
+        quizId: quiz.id,
+        answers,
+      };
+
+      const result = await quizService.submitQuizAnswers(submitQuizDto);
+      setQuizResult(result);
       setIsCompleted(true);
     } catch (err) {
       console.error("Error submitting quiz:", err);
@@ -143,6 +171,29 @@ export default function IndividualQuizPage() {
   }
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
+
+  // Add defensive check for currentQuestion
+  if (!currentQuestion) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Invalid Question
+            </h2>
+            <p className="text-gray-600 mb-6">
+              The question you're trying to access doesn't exist.
+            </p>
+            <Button onClick={() => router.push("/quizzes")}>
+              Back to Quizzes
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const answeredQuestions = getAnsweredQuestionsCount();
   const canGoPrevious = currentQuestionIndex > 0;
   const canGoNext = currentQuestionIndex < quiz.questions.length - 1;
@@ -229,6 +280,7 @@ export default function IndividualQuizPage() {
             quiz={quiz}
             userAnswers={userAnswers}
             onRetakeQuiz={handleRetakeQuiz}
+            result={quizResult}
           />
         )}
       </div>

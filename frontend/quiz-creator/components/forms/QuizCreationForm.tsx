@@ -87,8 +87,8 @@ export default function QuizCreationForm({
           order: 1,
           required: true,
           options: [
-            { text: "Yes", isCorrect: true, order: 1 },
-            { text: "No", isCorrect: false, order: 2 },
+            { text: "true", isCorrect: true, order: 1 },
+            { text: "false", isCorrect: false, order: 2 },
           ],
         },
       ],
@@ -125,8 +125,8 @@ export default function QuizCreationForm({
       order: newOrder,
       required: true,
       options: [
-        { text: "Yes", isCorrect: true, order: 1 },
-        { text: "No", isCorrect: false, order: 2 },
+        { text: "true", isCorrect: true, order: 1 },
+        { text: "false", isCorrect: false, order: 2 },
       ],
     });
   };
@@ -166,8 +166,8 @@ export default function QuizCreationForm({
       form.setValue(`questions.${questionIndex}.options`, []);
     } else if (type === "BOOLEAN") {
       form.setValue(`questions.${questionIndex}.options`, [
-        { text: "Yes", isCorrect: true, order: 1 },
-        { text: "No", isCorrect: false, order: 2 },
+        { text: "true", isCorrect: true, order: 1 },
+        { text: "false", isCorrect: false, order: 2 },
       ]);
     } else if (type === "CHECKBOX") {
       const currentOptions =
@@ -307,7 +307,7 @@ export default function QuizCreationForm({
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="BOOLEAN">
-                              Boolean (Yes/No)
+                              Boolean (True/False)
                             </SelectItem>
                             <SelectItem value="INPUT">Text Input</SelectItem>
                             <SelectItem value="CHECKBOX">
