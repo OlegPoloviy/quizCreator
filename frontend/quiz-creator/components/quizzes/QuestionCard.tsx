@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Circle, Square, Type } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { Question } from "@/types/Quiz.types";
 
 interface QuestionCardProps {
@@ -43,19 +43,6 @@ export default function QuestionCard({
   const handleTextInputChange = (value: string) => {
     setTextInput(value);
     handleAnswerChange(value);
-  };
-
-  const getQuestionTypeIcon = () => {
-    switch (question.type) {
-      case "BOOLEAN":
-        return <Circle className="w-4 h-4" />;
-      case "CHECKBOX":
-        return <Square className="w-4 h-4" />;
-      case "INPUT":
-        return <Type className="w-4 h-4" />;
-      default:
-        return <Circle className="w-4 h-4" />;
-    }
   };
 
   const getQuestionTypeLabel = () => {
@@ -127,7 +114,7 @@ export default function QuestionCard({
 
           {question.type === "CHECKBOX" && Array.isArray(question.options) && (
             <div className="space-y-2">
-              {question.options.map((option, index) => {
+              {question.options.map((option) => {
                 if (
                   !option ||
                   typeof option !== "object" ||

@@ -9,7 +9,14 @@ import QuestionCard from "@/components/quizzes/QuestionCard";
 import QuizProgress from "@/components/quizzes/QuizProgress";
 import QuizResults from "@/components/quizzes/QuizResults";
 import { quizService } from "../../lib/quiz.service";
-import { Quiz, Question } from "@/types/Quiz.types";
+import { Quiz } from "@/types/Quiz.types";
+
+interface QuizResult {
+  score: number;
+  startedAt?: string;
+  completedAt?: string;
+  answers: import("@/types/Quiz.types").SubmitAnswerDto[];
+}
 
 export default function IndividualQuizPage() {
   const params = useParams();
@@ -22,9 +29,13 @@ export default function IndividualQuizPage() {
   const [isStarted, setIsStarted] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<string, any>>({});
+  const [userAnswers, setUserAnswers] = useState<
+    Record<string, string | boolean | string[]>
+  >({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [quizResult, setQuizResult] = useState<any>(null);
+  const [quizResult, setQuizResult] = useState<QuizResult | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -91,7 +102,7 @@ export default function IndividualQuizPage() {
         if (question.type === "INPUT") {
           return {
             questionId: question.id,
-            textAnswer: userAnswer,
+            textAnswer: typeof userAnswer === "string" ? userAnswer : "",
           };
         }
         return { questionId: question.id };
@@ -159,7 +170,7 @@ export default function IndividualQuizPage() {
             </h2>
             <p className="text-gray-600 mb-6">
               {error ||
-                "The quiz you're looking for doesn't exist or has been removed."}
+                "The quiz you&#39;re looking for doesn&#39;t exist or has been removed."}
             </p>
             <Button onClick={() => router.push("/quizzes")}>
               Back to Quizzes
@@ -183,7 +194,7 @@ export default function IndividualQuizPage() {
               Invalid Question
             </h2>
             <p className="text-gray-600 mb-6">
-              The question you're trying to access doesn't exist.
+              The question you&#39;re trying to access doesn&#39;t exist.
             </p>
             <Button onClick={() => router.push("/quizzes")}>
               Back to Quizzes

@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Brain, Users, Clock, Play, Eye, Trash2 } from "lucide-react";
+import { Brain, Clock, Play, Eye, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { quizService } from "@/app/lib/quiz.service";
@@ -118,8 +118,8 @@ export default function QuizCard({ quiz, onQuizDeleted }: QuizCardProps) {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Delete Quiz</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Are you sure you want to delete "{quiz.title}"? This
-                        action cannot be undone.
+                        Are you sure you want to delete &quot;{quiz.title}
+                        &quot;? This action cannot be undone.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>

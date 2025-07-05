@@ -10,16 +10,20 @@ import {
   RotateCcw,
 } from "lucide-react";
 import Link from "next/link";
+import type { Quiz, SubmitAnswerDto } from "@/types/Quiz.types";
+
+interface QuizResult {
+  score: number;
+  startedAt?: string;
+  completedAt?: string;
+  answers: SubmitAnswerDto[];
+}
 
 interface QuizResultsProps {
-  quiz: {
-    id: string;
-    title: string;
-    questions: any[];
-  };
-  userAnswers: Record<string, any>;
+  quiz: Quiz;
+  userAnswers: Record<string, string | boolean | string[]>;
   onRetakeQuiz: () => void;
-  result?: any;
+  result?: QuizResult;
 }
 
 export default function QuizResults({

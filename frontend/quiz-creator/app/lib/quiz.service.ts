@@ -58,7 +58,7 @@ class QuizService {
 
   async deleteQuizById(id: string): Promise<void> {
     try {
-      const response = await axios.delete<Quiz>(`${this.baseUrl}/quiz/${id}`);
+      await axios.delete<Quiz>(`${this.baseUrl}/quiz/${id}`);
     } catch (error) {
       console.error("Error getting quiz:", error);
       throw error;
@@ -68,6 +68,7 @@ class QuizService {
   async submitAnswer(answer: SubmitAnswerDto) {
     try {
       const response = await axios.post<Quiz>(`${this.baseUrl}/quiz/submit`);
+      console.log(answer);
       return response;
     } catch (error) {
       console.error("Error getting quiz:", error);

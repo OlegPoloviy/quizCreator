@@ -31,8 +31,8 @@ export default function NotFound() {
                 Oops! Page Not Found
               </h2>
               <p className="text-xl text-gray-600 max-w-md mx-auto">
-                The quiz you're looking for seems to have wandered off. Don't
-                worry, we'll help you find your way back!
+                The quiz you&#39;re looking for seems to have wandered off.
+                Don&#39;t worry, we&#39;ll help you find your way back!
               </p>
             </div>
 

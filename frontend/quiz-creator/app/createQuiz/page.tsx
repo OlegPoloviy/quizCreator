@@ -5,17 +5,13 @@ import { ArrowLeft } from "lucide-react";
 import QuizCreationForm from "@/components/forms/QuizCreationForm";
 import { toast } from "sonner";
 import { quizService } from "../lib/quiz.service";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CreateQuizPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (data: any) => {
     try {
-      setIsLoading(true);
-
       if (!data || !data.questions || !Array.isArray(data.questions)) {
         throw new Error(
           "Invalid form data: questions array is missing or invalid"
@@ -34,13 +30,12 @@ export default function CreateQuizPage() {
         })),
       };
 
-      const quiz = await quizService.createQuiz(transformedData);
+      await quizService.createQuiz(transformedData);
       toast.success("Quiz created successfully!");
       router.push("/quizzes");
     } catch (error) {
       console.error("Error creating quiz:", error);
       toast.error("Error creating quiz. Please try again.");
-      setIsLoading(false);
       throw error;
     }
   };

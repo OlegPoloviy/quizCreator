@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -17,7 +16,6 @@ import {
   Plus,
   BarChart3,
 } from "lucide-react";
-import { quizService } from "./lib/quiz.service";
 
 export default async function Home() {
   return (

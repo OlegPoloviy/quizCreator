@@ -51,6 +51,7 @@ export default function QuizzesPage() {
       setEditingQuiz(null);
     } catch (err) {
       toast.error("Failed to update quiz");
+      console.error(err);
     } finally {
       setIsSaving(false);
     }
